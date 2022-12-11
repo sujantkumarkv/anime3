@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap');
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Bree Serif', serif;
+  /* background-image: linear-gradient(to top, #f43b47 0%, #453a94 100%); */
+  color: #fff;
+  background-image: linear-gradient(to right, #26b3f5 0%, #8585e8 41%, #b868de 100%);
+
+}
+
+
+.AppContainer{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 100px;
+  border-radius: 10px;
+}
+div .AppContainer{
+  border-radius: 30px;
+}
+
+.dataContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 1200px;
+  padding-top: 30px;
+  border-style: double;
+  border-radius: 30px;
+}
+div .dataContainer{
+  border-radius: 30px;
+}
+
+.AppTitle {
+  text-align: center;
+  font-size: 51px;
+}
+.bio {
+  text-align: center;
+  font-size: 20px;
+  margin: 15px;
+  padding: 20px;
+}
+
+
+.animeSearch{
+  margin-bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.animeSearchInput{
+  padding-left: 16px;
+  width: 500px;
+  height: 50px;
+  border-radius: 11px;
+  border: none;
+  color: #e2e2e2;
+}
+.animeSearchInput::placeholder{
+  color: #e2e2e2;
+}
+
+
+
+
