@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import 'bootstrap/dist/css/bootstrap.css';
-import {Card, Button} from "react-bootstrap";
+import {Container, Row, Col, Card, Button} from "react-bootstrap";
 
 import { ethers } from "ethers";
 import "./App.css";
@@ -192,19 +192,24 @@ const App = () => {
     //setAnimeSuggestion(event.target.value);
   };
   
+  let debounceTimeout; //timeout after when user stops typing & after which it hits api.
   useEffect(() => {
     if(search.trim()) //the change in search bar maybe whitespaces also.
     {
-      fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
-      .then(res => res.json())
-      .then(data => setResults(data))
-      .catch(error => alert(error))
+      clearTimeout(debounceTimeout)
+      debounceTimeout= setTimeout(() => {
+        fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
+        .then(res => res.json())
+        .then(data => setResults(data))
+        .catch(error => alert(error))
+      }, 500); //500ms ~ 0.5seconds timeout after user stops typing to hit api
     }
     else setResults([]) //if it's just whitespaces, show nothing from search
   },[search])
 
   
   return (
+    <>
     <div className="AppContainer" >
       <div className="dataContainer">
         <h1 className="AppTitle">Anime3</h1>
@@ -229,25 +234,35 @@ const App = () => {
                 />
         </form>
       </div>
-
-      <div className="results" id="results">
+      
+      
+      <Container>
+        <Row className="results justify-content-center" id="results">
         {results.map(anime => {
-          <>
-            <Card className="card">
+          return(
+          <Col className="result">
+            <Card className="card" >
               <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
                   <Card.Body className="cardBody">
+                    
                     <Card.Title className="cardTitle">{anime.animeTitle}</Card.Title>
-                <Button variant="outline-primary" onClick={suggestAnime}>Upvote</Button>
+                    
+                    
+                <Button variant="primary" onClick={suggestAnime}>Upvote</Button>
               </Card.Body>
             </Card> 
-          </>
-                  
+          </Col>
+        )
         })
         }
-      </div>
+        </Row>
+      </Container> 
+        
 
       </div> 
     </div>
+    </>
+     
   );
 };
 
