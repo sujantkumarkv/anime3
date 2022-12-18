@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+import 'bootstrap/dist/css/bootstrap.css';
+import {Card, Button} from "react-bootstrap";
+
 import { ethers } from "ethers";
 import "./App.css";
 import ABI from "./utils/AnimeList.json";
@@ -43,8 +46,9 @@ const App = () => {
   const [currentAccount, setCurrentAccount]= useState("");
   const [allSuggestions, setAllSuggestions] = useState([]);
 
-  const [animes ,setAnimes] = useState([]);
+  const [animes, setAnimes] = useState([]);
   const [search, setSearch] = useState('');
+  const [results, setResults] = useState([]);
   
   const [animeSuggestion, setAnimeSuggestion]= useState("");
   
@@ -100,7 +104,7 @@ const App = () => {
         const signer= provider.getSigner();
         const animeContract= new ethers.Contract(
           CONTRACT_ADDRESS, 
-          ABI.abi, 
+          contractABI.abi, 
           signer);
 
         //let count= await animeContract.getTotalAnimes();
@@ -125,8 +129,9 @@ const App = () => {
     }
   }
 
+/* 
 
-  const getAllSuggestions= async() => {
+ const getAllSuggestions= async() => {
        
     try{
       const {ethereum}= window;
@@ -169,62 +174,78 @@ const App = () => {
     }
   }
 
+*/
+ 
+
   
   
   useEffect(() => {
     checkIfWalletIsConnected();
-    getAllSuggestions(); //read from chain
+    //getAllSuggestions(); //read from chain
     }, []);
 
-  useEffect(() => {
-    fetch(`https://gogoanime.consumet.org/search?keyw=${}`)
-    .then(res=>{
-       setCoins(res.data)
-       console.log(res.data)
-    }).catch(error=>console.log(error))
-  }, [])
 
   const handleChange = event => {
-    setSearch(event.target.Value);
-    setAnimeSuggestion(event.target.value);
+    setSearch(event.target.value);
+    //If search changes, we can't change suggested anime yet, bcz only from the list
+    //shown, when the user clicks on suggest, then the txn is confirmed.
+    //setAnimeSuggestion(event.target.value);
   };
+  
+  useEffect(() => {
+    if(search.trim()) //the change in search bar maybe whitespaces also.
+    {
+      fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
+      .then(res => res.json())
+      .then(data => setResults(data))
+      .catch(error => alert(error))
+    }
+    else setResults([]) //if it's just whitespaces, show nothing from search
+  },[search])
 
+  
   return (
     <div className="AppContainer" >
       <div className="dataContainer">
-        <h1 className="AppTitle">Anime3</h1> 
-        <div className="bio">
-          For the WEB3 X ANIME community.
-          <p>Suggest & make your group suggest your favorite animes to the community & make it the 
-          top rated here.</p>
-        </div>
-      
-        <div className="animeSearch">
-        <form action="">
-          <input type="text" className="animeSearchInput" 
-                placeholder="Search your favorite anime" name="searchInput" 
-                value={animeSuggestion} onChange={handleChange}
-                />
-        </form>
-      </div>
-        
-        <button className="waveButton" onClick={suggestAnime}>
-          Suggest me
-        </button>
-        {!currentAccount && (
+        <h1 className="AppTitle">Anime3</h1>
+        <div className="connectWallet">
+          {!currentAccount && (
           <button className="waveButton" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
-        
-        {allSuggestions.map((anime, index) => {
-          return (
-            <div style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
-              <div>Address: {anime.address}</div>
-              <div>Time: {anime.timestamp.toString()}</div>
-              <div>Message: {anime.message}</div>
-            </div>)
-        })}
+        </div>
+        <div className="bio">
+          For the WEB3 X ANIME community.
+          <br/>Suggest & make your group suggest your favorite animes<br/> to the community and make it the top rated here.
+        </div>
+   
+        <div className="animeSearch">
+          <p>Didn't find yours in the Top15 below? Search here 👇</p>
+        <form action="">
+          <input type="text" className="animeSearchInput" 
+                placeholder="Search your favorite anime" name="searchInput" 
+                value={search} onChange={handleChange}
+                />
+        </form>
+      </div>
+
+      <div className="results" id="results">
+        {results.map(anime => {
+          <>
+            <Card className="card">
+              <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
+                  <Card.Body className="cardBody">
+                    <Card.Title className="cardTitle">{anime.animeTitle}</Card.Title>
+                <Button variant="outline-primary" onClick={suggestAnime}>Upvote</Button>
+              </Card.Body>
+            </Card> 
+          </>
+                  
+        })
+        }
+      </div>
+
       </div> 
     </div>
   );
