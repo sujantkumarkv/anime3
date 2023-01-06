@@ -1,1 +1,0 @@
-console.log(process.env.METAMASK_DEMVELOPER_PRIVATE_KEY);

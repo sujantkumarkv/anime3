@@ -5,13 +5,13 @@ const main = async () => {
     console.log("Deploying contracts with account: ", deployer.address);
     console.log("Account balance: ", accountBalance.toString());
   
-    const animeContractFactory = await hre.ethers.getContractFactory("AnimeList");
+    const animeContractFactory = await hre.ethers.getContractFactory("Anime3");
     const animeContract = await animeContractFactory.deploy({
       value: hre.ethers.utils.parseEther("0.1")
     });
     await animeContract.deployed();
   
-    console.log("AnimeList address: ", animeContract.address);
+    console.log("Anime3 contract address: ", animeContract.address);
   };
   
 const runMain = async () => {

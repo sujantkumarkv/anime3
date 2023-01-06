@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import 'bootstrap/dist/css/bootstrap.css';
+import {Footer} from './Components/Footer';
 import {Container, Row, Col, Card, Button} from "react-bootstrap";
 
 import { ethers } from "ethers";
 import "./App.css";
-import ABI from "./utils/AnimeList.json";
+import ABI from "./utils/Anime3.json";
 
 const getEthereumObject = () => window.ethereum;
 
@@ -36,7 +37,7 @@ const findMetamaskAccount= async () => {
 }
   
 const App = () => {
-  const CONTRACT_ADDRESS= "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const CONTRACT_ADDRESS= "0xAd198Eb63291Ce58c96b4AA707AAe49C94f76f87";
   const contractABI= ABI;
   /*
    * The passed callback function will be run when the page loads.
@@ -44,15 +45,31 @@ const App = () => {
    */
     
   const [currentAccount, setCurrentAccount]= useState("");
-  const [allSuggestions, setAllSuggestions] = useState([]);
+  const [allUpvotes, setAllUpvotes] = useState([]);
 
   const [animes, setAnimes] = useState([]);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
   
-  const [animeSuggestion, setAnimeSuggestion]= useState("");
+  const [animeUpvote, setAnimeUpvote]= useState("");
   
   
+  let debounceTimeout= useRef(); //timeout after when user stops typing, useRef() suggested by chatGPT
+  useEffect(() => {
+    if(search.trim()) //the change in search bar maybe whitespaces also.
+    {
+      clearTimeout(debounceTimeout.current)
+      debounceTimeout.current= setTimeout(() => {
+        fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
+        .then(res => res.json())
+        .then(data => setResults(data))
+        .catch(error => alert(error))
+      }, 500); //500ms ~ 0.5seconds timeout after user stops typing to hit api
+    }
+    else setResults([]) //if it's just whitespaces, show nothing from search
+  },[search])
+
+
   const connectWallet= async () =>{
     try{
       const ethereum= getEthereumObject();
@@ -95,7 +112,9 @@ const App = () => {
   }
 
 
-  const suggestAnime= async () => {
+
+
+  const upvoteAnime= async (animeId) => {
     try{
       const {ethereum}= window;
 
@@ -108,18 +127,19 @@ const App = () => {
           signer);
 
         //let count= await animeContract.getTotalAnimes();
-        //console.log("Total anime suggestions fetched: ", count.toNumber());
+        //console.log("Total anime upvotes fetched: ", count.toNumber());
 
-        // SUGGESTING ANIME i.e., SENDING TXN TO BLOCKCHAIN
-        const suggestAnimeTxn= await animeContract.suggestAnime(animeSuggestion, 
+        setAnimeUpvote(animeId); //setting the to-be-upvoted as animeId -> it's unique
+        // UPVOTING ANIME i.e., SENDING TXN TO BLOCKCHAIN
+        const upvoteAnimeTxn= await animeContract.upvoteAnime(animeUpvote, 
                                                                 {gasLimit: 300000});
         console.log("Mining txn....");
   
-        await suggestAnimeTxn.wait();
-        console.log("Mined ---", suggestAnimeTxn.hash);
+        await upvoteAnimeTxn.wait();
+        console.log("Mined ---", upvoteAnimeTxn.hash);
         
         //count= await animeContract.getTotalAnimes();
-        //console.log("Toal animes suggestions....", count.toNumber());
+        //console.log("Toal animes upvotes....", count.toNumber());
       }
       else
         console.log("Ethereum object doesn't exist!");
@@ -131,7 +151,7 @@ const App = () => {
 
 /* 
 
- const getAllSuggestions= async() => {
+ const getAllUpvotes= async() => {
        
     try{
       const {ethereum}= window;
@@ -144,20 +164,20 @@ const App = () => {
           ABI.abi, 
           signer);
 
-        const allSuggestions= await animeContract.getAllSuggestions();
+        const allUpvotes= await animeContract.getAllUpvotes();
 
-        const AnimeList = allSuggestions.map(anime => {
+        const AnimeList = allUpvotes.map(anime => {
         return {
           address: anime.suggestor,
           timestamp: new Date(anime.timestamp * 1000),
           message: anime.message,
         };
       });
-        setAllSuggestions(AnimeList);
+        setAllUpvotes(AnimeList);
 
         animeContract.on("newSuggestion", (from, timestamp, message)=> {
           console.log("newSuggestion", from, timestamp, message);
-          setAllSuggestions(prevState => [
+          setAllUpvotes(prevState => [
           ...prevState,
           {
             address: from,
@@ -175,13 +195,36 @@ const App = () => {
   }
 
 */
- 
+  const getAllUpvotesCount= async() => {
+        
+    try{
+      const {ethereum}= window;
+
+      if(ethereum){
+        const provider= new ethers.providers.Web3Provider(ethereum);
+        const signer= provider.getSigner();
+        const animeContract= new ethers.Contract(
+          CONTRACT_ADDRESS, 
+          ABI.abi, 
+          signer);
+
+        const allUpvotesCount= await animeContract.getAllUpvotesCount();
+        alert(`The total upvotes so far:${allUpvotesCount.toNumber()}`); //uint256 returned is in hex
+        
+
+      } else
+        console.log("Ethereum object doesn't exist!");
+      
+    }catch(err){
+      console.error(err);
+    }
+  }
 
   
   
   useEffect(() => {
     checkIfWalletIsConnected();
-    //getAllSuggestions(); //read from chain
+    //getAllUpvotes(); //read from chain
     }, []);
 
 
@@ -192,20 +235,7 @@ const App = () => {
     //setAnimeSuggestion(event.target.value);
   };
   
-  let debounceTimeout; //timeout after when user stops typing & after which it hits api.
-  useEffect(() => {
-    if(search.trim()) //the change in search bar maybe whitespaces also.
-    {
-      clearTimeout(debounceTimeout)
-      debounceTimeout= setTimeout(() => {
-        fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
-        .then(res => res.json())
-        .then(data => setResults(data))
-        .catch(error => alert(error))
-      }, 500); //500ms ~ 0.5seconds timeout after user stops typing to hit api
-    }
-    else setResults([]) //if it's just whitespaces, show nothing from search
-  },[search])
+  
 
   
   return (
@@ -222,16 +252,17 @@ const App = () => {
         </div>
         <div className="bio">
           For the WEB3 X ANIME community.
-          <br/>Suggest & make your group suggest your favorite animes<br/> to the community and make it the top rated here.
+          <br/>Upvote & make your group upvote your favorite animes<br/> to the community and make it the top rated here.
         </div>
-   
+        <div>
+        <Button variant="primary" onClick={() => getAllUpvotesCount()}>Get all time Upvotes count</Button>
+      </div>
         <div className="animeSearch">
-          <p>Didn't find yours in the Top15 below? Search here 👇</p>
+          <p>Didn't find yours in the Top10 below? Search here  👇</p>
         <form action="">
           <input type="text" className="animeSearchInput" 
                 placeholder="Search your favorite anime" name="searchInput" 
-                value={search} onChange={handleChange}
-                />
+                value={search} onChange={handleChange} />
         </form>
       </div>
       
@@ -240,15 +271,15 @@ const App = () => {
         <Row className="results justify-content-center" id="results">
         {results.map(anime => {
           return(
-          <Col className="result">
+          <Col key={anime.animeId} className="result">
             <Card className="card" >
               <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
                   <Card.Body className="cardBody">
                     
                     <Card.Title className="cardTitle">{anime.animeTitle}</Card.Title>
                     
-                    
-                <Button variant="primary" onClick={suggestAnime}>Upvote</Button>
+                {/* without the ()=> in onClick={() => {}},  */}
+                <Button variant="primary" onClick={() => upvoteAnime(anime.animeId)}>Upvote</Button> 
               </Card.Body>
             </Card> 
           </Col>
@@ -257,10 +288,13 @@ const App = () => {
         }
         </Row>
       </Container> 
-        
-
+      <Footer />
       </div> 
+
+      
     </div>
+
+  
     </>
      
   );

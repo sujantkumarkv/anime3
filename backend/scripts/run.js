@@ -1,6 +1,6 @@
 const main = async () => {
     const [owner, random]= await hre.ethers.getSigners();
-    const animeContractFactory = await hre.ethers.getContractFactory("AnimeList");
+    const animeContractFactory = await hre.ethers.getContractFactory("Anime3");
     const animeContract = await animeContractFactory.deploy({
       value: hre.ethers.utils.parseEther("0.01")
     });
@@ -16,29 +16,35 @@ const main = async () => {
 
 
     //animes before a suggestion
-    await animeContract.getTotalAnimes();
+    let upvoteCount= await animeContract.getAllUpvotesCount();
+    console.log(upvoteCount)
 
     //check for balance
     console.log("Contract balance : ", hre.ethers.utils.formatEther(contractBalance));
 
-    let animeSuggestTxn= await animeContract.suggestAnime("Death Note");
-    await animeSuggestTxn.wait();
+    let animeUpvoteTxn= await animeContract.upvoteAnime("Death Note");
+    await animeUpvoteTxn.wait();
 
-    animeSuggestTxn= await animeContract.connect(random).suggestAnime("One Piece");
-    await animeSuggestTxn.wait();
+    animeUpvoteTxn= await animeContract.connect(random).upvoteAnime("One Piece");
+    await animeUpvoteTxn.wait();
 
-    animeSuggestTxn= await animeContract.connect(random).suggestAnime("Bleach");
-    await animeSuggestTxn.wait();
+    animeUpvoteTxn= await animeContract.connect(random).upvoteAnime("Bleach");
+    await animeUpvoteTxn.wait();
 
     //check for balance after animeSuggestTxn
     contractBalance= await hre.ethers.provider.getBalance(animeContract.address);
     console.log("Contract balance : ", hre.ethers.utils.formatEther(contractBalance));
 
-    let allAnimeSuggestions= await animeContract.getAllSuggestions();
-    console.log(allAnimeSuggestions);
+    //let allAnimeSuggestions= await animeContract.getAllSuggestions();
+    //console.log(allAnimeSuggestions);
 
-    let totalSuggestions= await animeContract.getTotalAnimes();
-    console.log(totalSuggestions);
+    let allUpvotesCount= (await animeContract.getAllUpvotesCount()).toNumber();
+    console.log("Total anime upvotes", allUpvotesCount);
+
+
+    //show all upvotes till now
+    let allUpvotes= await animeContract.showAllAnimeUpvotes();
+    console.log(typeof(allUpvotes[0])); //typeof -> object & allUpvotes[0].length -> 4, the 4 props I gave.
   };
   
   
