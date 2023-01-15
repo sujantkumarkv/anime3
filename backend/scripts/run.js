@@ -16,19 +16,38 @@ const main = async () => {
 
 
     //animes before a suggestion
-    let upvoteCount= await animeContract.getAllUpvotesCount();
+    let upvoteCount= (await animeContract.getAllUpvotesCount());
     console.log(upvoteCount)
 
     //check for balance
     console.log("Contract balance : ", hre.ethers.utils.formatEther(contractBalance));
 
-    let animeUpvoteTxn= await animeContract.upvoteAnime("Death Note");
-    await animeUpvoteTxn.wait();
-
-    animeUpvoteTxn= await animeContract.connect(random).upvoteAnime("One Piece");
-    await animeUpvoteTxn.wait();
-
-    animeUpvoteTxn= await animeContract.connect(random).upvoteAnime("Bleach");
+    let animeUpvoteTxn;
+    for(let i=1; i<=10; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("Death Note");
+      await animeUpvoteTxn.wait();
+    }
+    for(let i=1; i<=9; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("One Piece");
+      await animeUpvoteTxn.wait();
+    }
+    for(let i=1; i<=8; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("Attack on Titan");
+      await animeUpvoteTxn.wait();
+    }
+    for(let i=1; i<=7; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("Demon Slayer");
+      await animeUpvoteTxn.wait();
+    }
+    for(let i=1; i<=6; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("Jujutsu kaisen");
+      await animeUpvoteTxn.wait();
+    }
+    for(let i=1; i<=5; i++){
+      animeUpvoteTxn= await animeContract.upvoteAnime("One Punch man");
+      await animeUpvoteTxn.wait();
+    }
+    animeUpvoteTxn= await animeContract.upvoteAnime("Dr. Stone");
     await animeUpvoteTxn.wait();
 
     //check for balance after animeSuggestTxn
@@ -43,8 +62,15 @@ const main = async () => {
 
 
     //show all upvotes till now
-    let allUpvotes= await animeContract.showAllAnimeUpvotes();
-    console.log(typeof(allUpvotes[0])); //typeof -> object & allUpvotes[0].length -> 4, the 4 props I gave.
+    let abc= await animeContract.getAllSortedUpvotedAnime();
+    console.log(abc[0]);
+    /*
+    //checking the upvote-count for each anime.
+    let onePieceCount= (await animeContract.getUpvoteCount("Death Note")).toNumber();
+    console.log(onePieceCount);
+    //IT'S WORKING
+     */
+    
   };
   
   

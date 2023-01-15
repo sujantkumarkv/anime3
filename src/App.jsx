@@ -220,6 +220,31 @@ const App = () => {
     }
   }
 
+
+  const showAllAnimeUpvotes= async() => {
+        
+    try{
+      const {ethereum}= window;
+
+      if(ethereum){
+        const provider= new ethers.providers.Web3Provider(ethereum);
+        const signer= provider.getSigner();
+        const animeContract= new ethers.Contract(
+          CONTRACT_ADDRESS, 
+          ABI.abi, 
+          signer);
+
+        const allUpvotes= await animeContract.showAllAnimeUpvotes();
+        console.log(allUpvotes);
+        
+
+      } else
+        console.log("Ethereum object doesn't exist!");
+      
+    }catch(err){
+      console.error(err);
+    }
+  }
   
   
   useEffect(() => {
@@ -255,7 +280,7 @@ const App = () => {
           <br/>Upvote & make your group upvote your favorite animes<br/> to the community and make it the top rated here.
         </div>
         <div>
-        <Button variant="primary" onClick={() => getAllUpvotesCount()}>Get all time Upvotes count</Button>
+        <Button variant="primary" onClick={() => showAllAnimeUpvotes()}>Get all time Upvotes count</Button>
       </div>
         <div className="animeSearch">
           <p>Didn't find yours in the Top10 below? Search here  👇</p>
