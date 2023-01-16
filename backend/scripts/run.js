@@ -62,14 +62,13 @@ const main = async () => {
 
 
     //show all upvotes till now
-    let abc= await animeContract.getAllSortedUpvotedAnime();
-    console.log(abc[0]);
-    /*
-    //checking the upvote-count for each anime.
-    let onePieceCount= (await animeContract.getUpvoteCount("Death Note")).toNumber();
-    console.log(onePieceCount);
-    //IT'S WORKING
-     */
+    let abc= await animeContract.getAnimeIds();
+    let xyz= await animeContract.getAllUpvotes();
+    console.log(abc)
+    console.log(xyz)
+
+    //gotta sort and get an array/object of animeIds & it's upvoteCounts
+
     
   };
   

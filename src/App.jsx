@@ -37,7 +37,7 @@ const findMetamaskAccount= async () => {
 }
   
 const App = () => {
-  const CONTRACT_ADDRESS= "0xAd198Eb63291Ce58c96b4AA707AAe49C94f76f87";
+  const CONTRACT_ADDRESS= "0x3803d317266c16648Cd955b25D3eB4F520f8Fd20";
   const contractABI= ABI;
   /*
    * The passed callback function will be run when the page loads.
@@ -208,8 +208,8 @@ const App = () => {
           ABI.abi, 
           signer);
 
-        const allUpvotesCount= await animeContract.getAllUpvotesCount();
-        alert(`The total upvotes so far:${allUpvotesCount.toNumber()}`); //uint256 returned is in hex
+        const allUpvotesCount= await animeContract.getAllUpvotesCount().toNumber();
+        alert(`The total upvotes so far:${allUpvotesCount}`); //uint256 returned is in hex
         
 
       } else
@@ -221,7 +221,7 @@ const App = () => {
   }
 
 
-  const showAllAnimeUpvotes= async() => {
+  const showAllUpvotes= async() => {
         
     try{
       const {ethereum}= window;
@@ -234,8 +234,10 @@ const App = () => {
           ABI.abi, 
           signer);
 
-        const allUpvotes= await animeContract.showAllAnimeUpvotes();
+        const allUpvotes= await animeContract.getAllUpvotes();
+        const animeIds= await animeContract.getAnimeIds();
         console.log(allUpvotes);
+        console.log(animeIds);
         
 
       } else
@@ -280,7 +282,7 @@ const App = () => {
           <br/>Upvote & make your group upvote your favorite animes<br/> to the community and make it the top rated here.
         </div>
         <div>
-        <Button variant="primary" onClick={() => showAllAnimeUpvotes()}>Get all time Upvotes count</Button>
+        <Button variant="primary" onClick={() => showAllUpvotes()}>Get all time Upvotes count</Button>
       </div>
         <div className="animeSearch">
           <p>Didn't find yours in the Top10 below? Search here  👇</p>
