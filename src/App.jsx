@@ -37,7 +37,7 @@ const findMetamaskAccount= async () => {
 }
   
 const App = () => {
-  const CONTRACT_ADDRESS= "0x3803d317266c16648Cd955b25D3eB4F520f8Fd20";
+  const CONTRACT_ADDRESS= "0x440F5a6d7D1B8D4caA45F641a807718bA55216a6";
   const contractABI= ABI;
   /*
    * The passed callback function will be run when the page loads.
@@ -45,14 +45,11 @@ const App = () => {
    */
     
   const [currentAccount, setCurrentAccount]= useState("");
-  const [allUpvotes, setAllUpvotes] = useState([]);
 
-  const [animes, setAnimes] = useState([]);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
-  
-  const [animeUpvote, setAnimeUpvote]= useState("");
-  
+  const [totalUpvotesCount, setTotalUpvotesCount]= useState(0);
+  const [isBeingSearched, setIsBeingSearched]= useState(false);
   
   let debounceTimeout= useRef(); //timeout after when user stops typing, useRef() suggested by chatGPT
   useEffect(() => {
@@ -114,7 +111,7 @@ const App = () => {
 
 
 
-  const upvoteAnime= async (animeId) => {
+  const upvoteAnime= async (animeId, animeTitle, animeImg, animeUrl) => {
     try{
       const {ethereum}= window;
 
@@ -128,18 +125,18 @@ const App = () => {
 
         //let count= await animeContract.getTotalAnimes();
         //console.log("Total anime upvotes fetched: ", count.toNumber());
+        if(animeId) console.log(animeId);
 
-        setAnimeUpvote(animeId); //setting the to-be-upvoted as animeId -> it's unique
         // UPVOTING ANIME i.e., SENDING TXN TO BLOCKCHAIN
-        const upvoteAnimeTxn= await animeContract.upvoteAnime(animeUpvote, 
-                                                                {gasLimit: 300000});
+        const upvoteAnimeTxn= await animeContract.upvoteAnime(animeId, animeTitle, animeImg, animeUrl,
+                                                                {gasLimit: 900000});
         console.log("Mining txn....");
-  
+        alert("Hang on!! Upvoting mines a transaction on-chain and will take a while...")
+
         await upvoteAnimeTxn.wait();
         console.log("Mined ---", upvoteAnimeTxn.hash);
-        
-        //count= await animeContract.getTotalAnimes();
-        //console.log("Toal animes upvotes....", count.toNumber());
+        alert(`"${animeTitle}" was upvoted successfully!!!`)
+        updateAllUpvotes(); //call it to update the list displayed. WORKS :)
       }
       else
         console.log("Ethereum object doesn't exist!");
@@ -149,79 +146,8 @@ const App = () => {
     }
   }
 
-/* 
 
- const getAllUpvotes= async() => {
-       
-    try{
-      const {ethereum}= window;
-
-      if(ethereum){
-        const provider= new ethers.providers.Web3Provider(ethereum);
-        const signer= provider.getSigner();
-        const animeContract= new ethers.Contract(
-          CONTRACT_ADDRESS, 
-          ABI.abi, 
-          signer);
-
-        const allUpvotes= await animeContract.getAllUpvotes();
-
-        const AnimeList = allUpvotes.map(anime => {
-        return {
-          address: anime.suggestor,
-          timestamp: new Date(anime.timestamp * 1000),
-          message: anime.message,
-        };
-      });
-        setAllUpvotes(AnimeList);
-
-        animeContract.on("newSuggestion", (from, timestamp, message)=> {
-          console.log("newSuggestion", from, timestamp, message);
-          setAllUpvotes(prevState => [
-          ...prevState,
-          {
-            address: from,
-            timestamp: new Date(timestamp * 1000),
-            message: message,
-          },
-        ]);   
-     });
-      } else
-        console.log("Ethereum object doesn't exist!");
-      
-    }catch(err){
-      console.error(err);
-    }
-  }
-
-*/
-  const getAllUpvotesCount= async() => {
-        
-    try{
-      const {ethereum}= window;
-
-      if(ethereum){
-        const provider= new ethers.providers.Web3Provider(ethereum);
-        const signer= provider.getSigner();
-        const animeContract= new ethers.Contract(
-          CONTRACT_ADDRESS, 
-          ABI.abi, 
-          signer);
-
-        const allUpvotesCount= await animeContract.getAllUpvotesCount().toNumber();
-        alert(`The total upvotes so far:${allUpvotesCount}`); //uint256 returned is in hex
-        
-
-      } else
-        console.log("Ethereum object doesn't exist!");
-      
-    }catch(err){
-      console.error(err);
-    }
-  }
-
-
-  const showAllUpvotes= async() => {
+  const updateAllUpvotes= async() => {
         
     try{
       const {ethereum}= window;
@@ -236,9 +162,37 @@ const App = () => {
 
         const allUpvotes= await animeContract.getAllUpvotes();
         const animeIds= await animeContract.getAnimeIds();
-        console.log(allUpvotes);
-        console.log(animeIds);
-        
+
+        const totalUpvotesCount= (await animeContract.getAllUpvotesCount()).toNumber();
+        setTotalUpvotesCount(totalUpvotesCount);
+        //console.log(allUpvotes[9].upvoteCount.toNumber());
+        //console.log(animeIds);
+        //below one works
+        //allUpvotes.map(upvote => {
+        //  console.log(upvote.animeId);
+        //})
+
+        const animeUpvotes = animeIds.map(animeId => {
+          const lastOccurrence = allUpvotes.findLast(upvote => upvote.animeId === animeId);
+          return {animeId: lastOccurrence.animeId,
+                  animeTitle: lastOccurrence.animeTitle,
+                  animeImg: lastOccurrence.animeImg,
+                  animeUrl: lastOccurrence.animeUrl,
+                  upvoteCount: lastOccurrence.upvoteCount.toNumber(),                
+                  };
+        });
+        /*The comparator function in this case compares the upvoteCount property of two elements, a and b, and
+          returns the difference. A positive value means that b comes first and a negative value means that a comes first.
+          So in this case it will sort the array in descending order of upvoteCount. 
+          
+          #It was needed to look for the case when the upvoteCount is same, but due to the nature of animeIds,
+          which has elements added in order of timings of when they were upvoted, so naturally they're added into the 
+          animeUpvotes array in that order, & that order correctly gives preference to the anime upvoted earlier.
+          */
+        animeUpvotes.sort((a, b) => b.upvoteCount - a.upvoteCount);
+        setResults(animeUpvotes); //when search is empty, we gotta show this.
+
+        console.log(animeUpvotes, animeIds);
 
       } else
         console.log("Ethereum object doesn't exist!");
@@ -254,6 +208,15 @@ const App = () => {
     //getAllUpvotes(); //read from chain
     }, []);
 
+  //If nothing is searched,
+  useEffect(() => {
+      if(search === ""){
+        updateAllUpvotes();
+        setIsBeingSearched(false);
+      }
+      else setIsBeingSearched(true);
+    }, [search])
+  
 
   const handleChange = event => {
     setSearch(event.target.value);
@@ -279,10 +242,10 @@ const App = () => {
         </div>
         <div className="bio">
           For the WEB3 X ANIME community.
-          <br/>Upvote & make your group upvote your favorite animes<br/> to the community and make it the top rated here.
+          <br/>Tell about your favorite anime. Upvote ⬆️ here,<br/> and tell your frens to make your favorite as the top rated one!!!
         </div>
         <div>
-        <Button variant="primary" onClick={() => showAllUpvotes()}>Get all time Upvotes count</Button>
+        <Button variant="primary" onClick={() => updateAllUpvotes()}>Get all time Upvotes count</Button>
       </div>
         <div className="animeSearch">
           <p>Didn't find yours in the Top10 below? Search here  👇</p>
@@ -296,17 +259,25 @@ const App = () => {
       
       <Container>
         <Row className="results justify-content-center" id="results">
-        {results.map(anime => {
+        {results.map((anime, index) => {
           return(
           <Col key={anime.animeId} className="result">
             <Card className="card" >
               <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
                   <Card.Body className="cardBody">
+                    {isBeingSearched ? 
+                      <Card.Title className="cardTitle">{anime.animeTitle} </Card.Title>
+                      :
+                      <>
+                      <Card.Title className="cardTitle"><strong>#{index+1}.</strong> {anime.animeTitle} </Card.Title>
+                      <p>{ Math.round((anime.upvoteCount / totalUpvotesCount) * 100) }% users upvoted this.</p>
+                      </>      
+                  }
                     
-                    <Card.Title className="cardTitle">{anime.animeTitle}</Card.Title>
-                    
-                {/* without the ()=> in onClick={() => {}},  */}
-                <Button variant="primary" onClick={() => upvoteAnime(anime.animeId)}>Upvote</Button> 
+                {/* without the ()=> in onClick={() => {}}, it would be run automatically, so it has to be passed as a function. */}
+                <Button className="card-btn" variant="primary" onClick={() => upvoteAnime(anime.animeId, anime.animeTitle, 
+                                                                    anime.animeImg, anime.animeUrl)}>Upvote  ⬆️</Button> 
+                <Button className="card-btn" variant="primary" href={anime.animeUrl} target="_blank">Watch  ▶️</Button>                                                    
               </Card.Body>
             </Card> 
           </Col>

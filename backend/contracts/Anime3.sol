@@ -18,15 +18,20 @@ contract Anime3 {
     string[] animeIds;
     struct animeUpvoteStruct { //this is for pushing txn history to chain.
         string animeId;
+        string animeTitle;
+        string animeImg;
+        string animeUrl;
         uint256 upvoteCount;
+
         address upvoter; // The address of the user who upvoted.
         uint256 timestamp; // The timestamp when the user upvoted.
     }
     animeUpvoteStruct[] animeUpvoteArray; //array containing upvoted animes.
 
-    event newUpvote(string animeId, uint256 upvoteCount, address indexed from, uint256 timestamp);
+    event newUpvote(string animeId, string animeTitle, string animeImg, string animeUrl,
+                    uint256 upvoteCount, address indexed from, uint256 timestamp);
 
-    function upvoteAnime(string memory _animeId) public{
+    function upvoteAnime(string memory _animeId, string memory _animeTitle, string memory _animeImg, string memory _animeUrl) public{
         //require(lastUpvoted[msg.sender] + 11 seconds < block.timestamp, "Wait for 11 seconds please");
         //lastUpvoted[msg.sender]= block.timestamp;
 
@@ -48,7 +53,8 @@ contract Anime3 {
             animeUpvoteMapping[_animeId]= 1;
             animeIds.push(_animeId);
         }
-        animeUpvoteArray.push(animeUpvoteStruct(_animeId, animeUpvoteMapping[_animeId], msg.sender, block.timestamp));
+        animeUpvoteArray.push(animeUpvoteStruct(_animeId, _animeTitle, _animeImg, _animeUrl,
+                                                animeUpvoteMapping[_animeId], msg.sender, block.timestamp));
 
          /*
          * Generate a new seed for the next user that sends a wave
@@ -70,7 +76,8 @@ contract Anime3 {
         console.log("%s has upvoted a new anime", msg.sender);
          */
         //This will make it easy to retrieve the waves from our website
-        emit newUpvote(_animeId, animeUpvoteMapping[_animeId], msg.sender, block.timestamp);
+        emit newUpvote(_animeId, _animeTitle, _animeImg, _animeUrl,
+                        animeUpvoteMapping[_animeId], msg.sender, block.timestamp);
     }
 
    
@@ -84,7 +91,6 @@ contract Anime3 {
 
 
     function getAllUpvotes() public view returns (animeUpvoteStruct[] memory) {
-        
         return animeUpvoteArray;
     }
 

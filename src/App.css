@@ -115,6 +115,13 @@ div .dataContainer{
   flex: 0 0 20%; /* 4 columns */
 }
 
+.card-btn {
+  padding: 5px;
+  margin: 5px;
+}
+.anime-ranking {
+  color: aqua;
+}
 
 
 
