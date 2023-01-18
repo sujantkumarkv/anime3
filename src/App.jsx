@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import {Footer} from './Components/Footer';
-import {Container, Row, Col, Card, Button} from "react-bootstrap";
+import {Container, Row, Col, Card, Button,
+        Pagination, ToggleButton, ToggleButtonGroup, ButtonGroup} from "react-bootstrap";
 
 import { ethers } from "ethers";
 import "./App.css";
@@ -50,6 +51,8 @@ const App = () => {
   const [results, setResults] = useState([]);
   const [totalUpvotesCount, setTotalUpvotesCount]= useState(0);
   const [isBeingSearched, setIsBeingSearched]= useState(false);
+  const [allTimeToggle, setAllTimeToggle]= useState(false);
+
   
   let debounceTimeout= useRef(); //timeout after when user stops typing, useRef() suggested by chatGPT
   useEffect(() => {
@@ -131,7 +134,7 @@ const App = () => {
         const upvoteAnimeTxn= await animeContract.upvoteAnime(animeId, animeTitle, animeImg, animeUrl,
                                                                 {gasLimit: 900000});
         console.log("Mining txn....");
-        alert("Hang on!! Upvoting mines a transaction on-chain and will take a while...")
+        alert("Hang on!! Upvoting mines an on-chain transaction and will take a while...")
 
         await upvoteAnimeTxn.wait();
         console.log("Mined ---", upvoteAnimeTxn.hash);
@@ -171,6 +174,14 @@ const App = () => {
         //allUpvotes.map(upvote => {
         //  console.log(upvote.animeId);
         //})
+        
+        
+        if(allTimeToggle === true){
+          animeIds.reverse();
+          console.log(animeIds);
+        }
+         
+        
 
         const animeUpvotes = animeIds.map(animeId => {
           const lastOccurrence = allUpvotes.findLast(upvote => upvote.animeId === animeId);
@@ -181,7 +192,8 @@ const App = () => {
                   upvoteCount: lastOccurrence.upvoteCount.toNumber(),                
                   };
         });
-        /*The comparator function in this case compares the upvoteCount property of two elements, a and b, and
+        /*
+          The comparator function in this case compares the upvoteCount property of two elements, a and b, and
           returns the difference. A positive value means that b comes first and a negative value means that a comes first.
           So in this case it will sort the array in descending order of upvoteCount. 
           
@@ -189,10 +201,13 @@ const App = () => {
           which has elements added in order of timings of when they were upvoted, so naturally they're added into the 
           animeUpvotes array in that order, & that order correctly gives preference to the anime upvoted earlier.
           */
-        animeUpvotes.sort((a, b) => b.upvoteCount - a.upvoteCount);
+        if(!allTimeToggle) {
+          animeUpvotes.sort((a, b) => b.upvoteCount - a.upvoteCount);
+        }
+        
         setResults(animeUpvotes); //when search is empty, we gotta show this.
 
-        console.log(animeUpvotes, animeIds);
+        //console.log(animeUpvotes, animeIds);
 
       } else
         console.log("Ethereum object doesn't exist!");
@@ -218,6 +233,10 @@ const App = () => {
     }, [search])
   
 
+  useEffect(() => {
+    updateAllUpvotes();
+  }, [allTimeToggle])
+
   const handleChange = event => {
     setSearch(event.target.value);
     //If search changes, we can't change suggested anime yet, bcz only from the list
@@ -225,7 +244,10 @@ const App = () => {
     //setAnimeSuggestion(event.target.value);
   };
   
-  
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(0);
+  const start = currentPage * itemsPerPage;
+  const end = start + itemsPerPage;
 
   
   return (
@@ -242,10 +264,9 @@ const App = () => {
         </div>
         <div className="bio">
           For the WEB3 X ANIME community.
-          <br/>Tell about your favorite anime. Upvote ⬆️ here,<br/> and tell your frens to make your favorite as the top rated one!!!
+          <br/>Upvote ⬆️ your favorite anime here, share it<br/> to your frens too, and make your favorites the top rated one!!!
         </div>
         <div>
-        <Button variant="primary" onClick={() => updateAllUpvotes()}>Get all time Upvotes count</Button>
       </div>
         <div className="animeSearch">
           <p>Didn't find yours in the Top10 below? Search here  👇</p>
@@ -255,37 +276,112 @@ const App = () => {
                 value={search} onChange={handleChange} />
         </form>
       </div>
+
+      {isBeingSearched ? 
+        <div></div>
+        :
+        <div className="toggle-container">
+        <ToggleButtonGroup type="radio" name="options" defaultValue={1}>
+          <ToggleButton variant="secondary" className={`toggle-btn ${allTimeToggle ? '' : 'active'}`}
+                        onClick={() => setAllTimeToggle(false)} value={1}>
+            Top 10
+          </ToggleButton>
+          <ToggleButton variant="secondary" className={`toggle-btn ${allTimeToggle ? 'active' : ''}`}
+                        onClick={() => setAllTimeToggle(true)} value={2}>
+            All time
+          </ToggleButton>
+        </ToggleButtonGroup>        
+      </div>
+      }
       
-      
+
+    {!allTimeToggle ?
       <Container>
-        <Row className="results justify-content-center" id="results">
-        {results.map((anime, index) => {
-          return(
-          <Col key={anime.animeId} className="result">
-            <Card className="card" >
-              <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
-                  <Card.Body className="cardBody">
-                    {isBeingSearched ? 
-                      <Card.Title className="cardTitle">{anime.animeTitle} </Card.Title>
-                      :
-                      <>
-                      <Card.Title className="cardTitle"><strong>#{index+1}.</strong> {anime.animeTitle} </Card.Title>
-                      <p>{ Math.round((anime.upvoteCount / totalUpvotesCount) * 100) }% users upvoted this.</p>
-                      </>      
-                  }
-                    
-                {/* without the ()=> in onClick={() => {}}, it would be run automatically, so it has to be passed as a function. */}
-                <Button className="card-btn" variant="primary" onClick={() => upvoteAnime(anime.animeId, anime.animeTitle, 
-                                                                    anime.animeImg, anime.animeUrl)}>Upvote  ⬆️</Button> 
-                <Button className="card-btn" variant="primary" href={anime.animeUrl} target="_blank">Watch  ▶️</Button>                                                    
-              </Card.Body>
-            </Card> 
-          </Col>
-        )
-        })
-        }
-        </Row>
+        <Row className="results justify-content-center" >
+          
+          {
+            results.slice(0, 10).map((anime, index) => {
+              return(
+              <Col key={anime.animeId} className="result">
+                <Card className="card" >
+                  <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
+                      <Card.Body className="cardBody">
+                        {isBeingSearched ? 
+                          <Card.Title className="cardTitle">{anime.animeTitle} </Card.Title>
+                          :
+                          <>
+                          <Card.Title className="cardTitle"><strong>#{index+1}.</strong> {anime.animeTitle} </Card.Title>
+                          <p>{ Math.round((anime.upvoteCount / totalUpvotesCount) * 100) }% users upvoted this.</p>
+                          </>      
+                      }
+                        
+                    {/* without the ()=> in onClick={() => {}}, it would be run automatically, so it has to be passed as a function. */}
+                    <Button className="card-btn" variant="primary" onClick={() => upvoteAnime(anime.animeId, anime.animeTitle, 
+                                                                        anime.animeImg, anime.animeUrl)}>Upvote  ⬆️</Button> 
+                    <Button className="card-btn" variant="primary" href={anime.animeUrl} target="_blank">Watch  ▶️</Button>                                                    
+                  </Card.Body>
+                </Card> 
+              </Col>
+            )
+            })
+          }
+          
+          </Row>
       </Container> 
+          
+          :
+          
+     
+        <Pagination className="pagination">
+          <Container>
+            <div className="pagination-arrows">
+              <ToggleButtonGroup name="pagination-arrows">
+                <ToggleButton variant="secondary" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0}>
+                  <Pagination.Prev />
+                </ToggleButton>
+                <ToggleButton variant="secondary" onClick={() => setCurrentPage(currentPage + 1)} 
+                                            disabled={currentPage === Math.ceil(results.length / itemsPerPage) - 1}>
+                  <Pagination.Next />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
+
+ 
+          <Row className="results justify-content-center" >
+            {results.slice(start, end).map((anime, index) => { 
+                return(
+                  <Col key={anime.animeId} sm={4} className="result">
+                    
+                    <Card className="card" >
+                      <Card.Img className="cardImpTop" variant="top" src={anime.animeImg} />
+                        <Card.Body className="cardBody">
+                          {isBeingSearched ? 
+                            <Card.Title className="cardTitle">{anime.animeTitle} </Card.Title>
+                            :
+                            <>
+                            <Card.Title className="cardTitle"> {anime.animeTitle} </Card.Title>
+                            <p>{ Math.round((anime.upvoteCount / totalUpvotesCount) * 100) }% users upvoted this.</p>
+                            </>      
+                          }
+                          <Button className="card-btn" variant="primary" onClick={() => upvoteAnime(anime.animeId, anime.animeTitle, 
+                                                                                      anime.animeImg, anime.animeUrl)}>Upvote  ⬆️</Button> 
+                          <Button className="card-btn" variant="primary" href={anime.animeUrl} target="_blank">Watch  ▶️</Button>                                                    
+                        </Card.Body>
+                    </Card> 
+                  
+                  </Col>
+                  
+                )
+              })}
+          </Row>
+          </Container> 
+        </Pagination>
+       
+         
+          
+        }
+            
+      
       <Footer />
       </div> 
 
