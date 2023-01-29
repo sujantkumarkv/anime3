@@ -11,6 +11,9 @@ PS: <i>May expand to more general content on feedback.</i>
 ### Demo:
 \
 ![](anime3-upvote%20demo.gif)
+
+\
+Check it out [here](https://anime3-upvote.vercel.app).
 #
 
 The project directory is a react app with an additional folder `backend/` containing smart contract logic built using [hardhat](https://hardhat.org/hardhat-runner/docs/getting-started#quick-start), and deployed to [goerli](https://chainlist.org/?testnets=true&search=goerli) testnet.
@@ -42,9 +45,12 @@ Builds the app for production to the `build` folder.\
 
 <br>
 
+#### PS:
+
+- We're using [gogoanime's API](https://github.com/riimuru/gogoanime-api) endpoints for search data. Shoutout to the builders !!!
 
 
-It's all open-source, pick it up, improve, build or suggest/open a PR to make it more fun and expand features.
+- It's all open-source, pick it up, improve, build or suggest/open a PR to make it more fun and expand features.
 
 
 #
