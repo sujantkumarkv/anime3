@@ -1,70 +1,55 @@
-# Getting Started with Create React App
+# <strong> Anime3 </strong> <br> ![anime3 logo](public/logo250.png)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is built for fun for the <strong>Web3 X Anime</strong> community.
+<br> Upvote ⬆️ your favorite anime here, share it
+to your frens, and make your favorites the top rated one!!!
+<p> 
+PS: <i>May expand to more general content on feedback.</i>
+</p>
 
-## Available Scripts
 
-In the project directory, you can run:
+### Demo:
+\
+![](anime3-upvote%20demo.gif)
+#
 
-### `npm start`
+The project directory is a react app with an additional folder `backend/` containing smart contract logic built using [hardhat](https://hardhat.org/hardhat-runner/docs/getting-started#quick-start), and deployed to [goerli](https://chainlist.org/?testnets=true&search=goerli) testnet.
+
+PS: <i>click the links to get started setting it up.</i>
+
+## Local setup 
+<i>In this directory</i>
+
+### `npm start` 
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+<i>In the `backend/` directory</i>
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### `npx hardhat run scripts/?`
+- you can run `scripts/run.js` OR `scripts/deploy.js` for testing changes in contract locally and deploying it to goerli testnet <i>respectively</i>.
 
-### `npm run eject`
+#### We're using [Quicknode](https://www.quicknode.com/docs)'s services here, you can use a service of your choice.
+#### <strong>  `hardhat.config.js` contains object values `url` and `accounts` for your own Quicknode's goerli URL & your ethereum account's private key.
+#### Use `dotenv` to export the values and be sure to not commit it.
+</strong>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+<br>
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+It's all open-source, pick it up, improve, build or suggest/open a PR to make it more fun and expand features.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#
+<br>
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Copyright: `MIT`
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
