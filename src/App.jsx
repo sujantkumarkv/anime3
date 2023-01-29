@@ -60,10 +60,10 @@ const App = () => {
     {
       clearTimeout(debounceTimeout.current)
       debounceTimeout.current= setTimeout(() => {
-        fetch(`https://gogoanime.consumet.org/search?keyw=${search}`)
+        fetch(`https://gogoanime.consumet.stream/search?keyw=${search}`)
         .then(res => res.json())
         .then(data => setResults(data))
-        .catch(error => alert(error))
+        .catch(error => console.log(error))
       }, 500); //500ms ~ 0.5seconds timeout after user stops typing to hit api
     }
     else setResults([]) //if it's just whitespaces, show nothing from search
