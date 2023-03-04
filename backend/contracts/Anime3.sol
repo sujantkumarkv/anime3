@@ -56,8 +56,8 @@ contract Anime3 {
         animeUpvoteArray.push(animeUpvoteStruct(_animeId, _animeTitle, _animeImg, _animeUrl,
                                                 animeUpvoteMapping[_animeId], msg.sender, block.timestamp));
 
-         /*
-         * Generate a new seed for the next user that sends a wave
+         
+         //Generate a new seed for the next user that sends a wave
         
         seed = (block.difficulty + block.timestamp + seed) % 100;
         console.log("Random # generated: %d", seed);
@@ -74,7 +74,7 @@ contract Anime3 {
             console.log("Prize sent successfully");
         }
         console.log("%s has upvoted a new anime", msg.sender);
-         */
+       
         //This will make it easy to retrieve the waves from our website
         emit newUpvote(_animeId, _animeTitle, _animeImg, _animeUrl,
                         animeUpvoteMapping[_animeId], msg.sender, block.timestamp);
